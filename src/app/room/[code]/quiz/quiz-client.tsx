@@ -15,16 +15,60 @@ import type { RealtimeChannel } from "@supabase/supabase-js"
 import type { Room, RoomPlayer, PresenceState } from "@/types/rooms"
 import type { 
   QuizState, 
-  QuizBroadcastEvent, 
-  QuizStartEvent, 
-  QuizRoundStartEvent,
-  QuizPlayerAnswerEvent,
-  QuizAnswersLockedEvent,
-  QuizRevealEvent,
-  QuizEndEvent,
   PlayerScore,
   DEFAULT_QUIZ_CONFIG
 } from "@/types/quiz"
+
+// Temporary types for the current implementation
+interface QuizStartEvent {
+  type: 'quiz'
+  action: 'start'
+  total_rounds: number
+}
+
+interface QuizRoundStartEvent {
+  type: 'quiz'
+  action: 'round_start'
+  round_number: number
+  question: {
+    question: string
+    choices: string[]
+    correct_index: number
+  }
+  deadline: string
+}
+
+interface QuizAnswerEvent {
+  type: 'quiz'
+  action: 'answer'
+  player_id: string
+  choice_index: number
+  timestamp: string
+}
+
+interface QuizLockEvent {
+  type: 'quiz'
+  action: 'lock'
+  timestamp: string
+}
+
+interface QuizRevealEvent {
+  type: 'quiz'
+  action: 'reveal'
+  round_number: number
+  correct_index: number
+  correct_choice: string
+  correct_players: string[]
+  points_awarded: number
+  timestamp: string
+}
+
+interface QuizEndEvent {
+  type: 'quiz'
+  action: 'end'
+  final_scores: Array<{ player_id: string; display_name: string; score: number }>
+  timestamp: string
+}
 
 interface QuizClientProps {
   code: string
@@ -117,7 +161,7 @@ function QuizPageContent({ code }: QuizClientProps) {
     })
   }, [addToast])
 
-  const handlePlayerAnswer = useCallback((event: QuizPlayerAnswerEvent) => {
+  const handlePlayerAnswer = useCallback((event: QuizAnswerEvent) => {
     setQuizState(prev => {
       const newAnswers = new Map(prev.playerAnswers)
       newAnswers.set(event.player_id, {
@@ -131,7 +175,7 @@ function QuizPageContent({ code }: QuizClientProps) {
     })
   }, [])
 
-  const handleAnswersLocked = useCallback((event: QuizAnswersLockedEvent) => {
+  const handleAnswersLocked = useCallback((event: QuizLockEvent) => {
     setQuizState(prev => ({
       ...prev,
       timeLeft: 0,
@@ -207,10 +251,10 @@ function QuizPageContent({ code }: QuizClientProps) {
         handleRoundStart(event as QuizRoundStartEvent)
         break
       case 'answer':
-        handlePlayerAnswer(event as QuizPlayerAnswerEvent)
+        handlePlayerAnswer(event as QuizAnswerEvent)
         break
       case 'lock':
-        handleAnswersLocked(event as QuizAnswersLockedEvent)
+        handleAnswersLocked(event as QuizLockEvent)
         break
       case 'reveal':
         handleReveal(event as QuizRevealEvent)
@@ -282,14 +326,16 @@ function QuizPageContent({ code }: QuizClientProps) {
   const lockAnswers = useCallback(async () => {
     if (!isHost || !channel) return
 
+    const lockEvent: QuizLockEvent = {
+      type: 'quiz',
+      action: 'lock',
+      timestamp: new Date().toISOString(),
+    }
+
     await channel.send({
       type: 'broadcast',
       event: 'quiz',
-      payload: {
-        type: 'quiz',
-        action: 'lock',
-        timestamp: new Date().toISOString(),
-      } as QuizAnswersLockedEvent,
+      payload: lockEvent,
     })
   }, [isHost, channel])
 
@@ -388,7 +434,7 @@ function QuizPageContent({ code }: QuizClientProps) {
       }
 
       // Broadcast answer to other players
-      const answerEvent: QuizPlayerAnswerEvent = {
+      const answerEvent: QuizAnswerEvent = {
         type: 'quiz',
         action: 'answer',
         player_id: currentPlayer.id,
