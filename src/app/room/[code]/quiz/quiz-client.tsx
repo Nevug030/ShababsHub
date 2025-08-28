@@ -41,14 +41,17 @@ interface QuizState {
 }
 
 // Temporary types for the current implementation
-interface QuizStartEvent {
+interface QuizBroadcastEvent {
   type: 'quiz'
+  action: 'start' | 'round_start' | 'answer' | 'lock' | 'reveal' | 'end'
+}
+
+interface QuizStartEvent extends QuizBroadcastEvent {
   action: 'start'
   total_rounds: number
 }
 
-interface QuizRoundStartEvent {
-  type: 'quiz'
+interface QuizRoundStartEvent extends QuizBroadcastEvent {
   action: 'round_start'
   round_number: number
   question: {
@@ -59,22 +62,19 @@ interface QuizRoundStartEvent {
   deadline: string
 }
 
-interface QuizAnswerEvent {
-  type: 'quiz'
+interface QuizAnswerEvent extends QuizBroadcastEvent {
   action: 'answer'
   player_id: string
   choice_index: number
   timestamp: string
 }
 
-interface QuizLockEvent {
-  type: 'quiz'
+interface QuizLockEvent extends QuizBroadcastEvent {
   action: 'lock'
   timestamp: string
 }
 
-interface QuizRevealEvent {
-  type: 'quiz'
+interface QuizRevealEvent extends QuizBroadcastEvent {
   action: 'reveal'
   round_number: number
   correct_index: number
@@ -84,8 +84,7 @@ interface QuizRevealEvent {
   timestamp: string
 }
 
-interface QuizEndEvent {
-  type: 'quiz'
+interface QuizEndEvent extends QuizBroadcastEvent {
   action: 'end'
   final_scores: Array<{ player_id: string; display_name: string; score: number }>
   timestamp: string
