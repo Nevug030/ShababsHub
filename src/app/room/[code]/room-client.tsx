@@ -31,31 +31,12 @@ function RoomPageContent({ code }: RoomClientProps) {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null)
   const [isWaving, setIsWaving] = useState(false)
 
-  // Validate room code
-  if (!isValidRoomCode(code)) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
-              <Button onClick={() => router.push('/')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Zurück zur Startseite
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+  // Validate room code early but don't return yet
+  const isValidCode = isValidRoomCode(code)
 
   // Load room data
   const loadRoom = useCallback(async () => {
-    if (!code) return
+    if (!code || !isValidCode) return
 
     try {
       const response = await fetch(`/api/rooms/${code}`)
@@ -74,7 +55,7 @@ function RoomPageContent({ code }: RoomClientProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [code])
+  }, [code, isValidCode])
 
   // Join room
   const joinRoom = useCallback(async (player: { id: string; name: string }) => {
@@ -251,7 +232,29 @@ function RoomPageContent({ code }: RoomClientProps) {
     return () => {
       roomChannel.unsubscribe()
     }
-  }, [supabase, currentPlayer, room, players, code, addToast])
+  }, [currentPlayer, room, players, code, addToast])
+
+  // Early returns after all hooks
+  if (!isValidCode) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
+              <Button onClick={() => router.push('/')}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Zurück zur Startseite
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (

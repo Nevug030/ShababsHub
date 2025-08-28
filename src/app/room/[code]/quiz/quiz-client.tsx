@@ -56,31 +56,12 @@ function QuizPageContent({ code }: QuizClientProps) {
     deadline: null,
   })
 
-  // Validate room code
-  if (!isValidRoomCode(code)) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
-              <Button onClick={() => router.push('/')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Zurück zur Startseite
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+  // Validate room code early but don't return yet
+  const isValidCode = isValidRoomCode(code)
 
   // Load room data
   const loadRoom = useCallback(async () => {
-    if (!code) return
+    if (!code || !isValidCode) return
 
     try {
       const response = await fetch(`/api/rooms/${code}`)
@@ -99,7 +80,7 @@ function QuizPageContent({ code }: QuizClientProps) {
     } finally {
       setIsLoading(false)
     }
-  }, [code])
+  }, [code, isValidCode])
 
   // Quiz event handlers
   const handleQuizStart = useCallback((event: QuizStartEvent) => {
@@ -511,7 +492,29 @@ function QuizPageContent({ code }: QuizClientProps) {
     return () => {
       roomChannel.unsubscribe()
     }
-  }, [supabase, currentPlayer, room, players, code, handleQuizEvent])
+  }, [currentPlayer, room, players, code, handleQuizEvent])
+
+  // Early returns after all hooks
+  if (!isValidCode) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
+              <Button onClick={() => router.push('/')}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Zurück zur Startseite
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
