@@ -12,21 +12,40 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         
-        {/* Games Section */}
-        <section id="games-section" className="py-16">
+        {/* Games Section - Rooms */}
+        <section id="games-rooms" className="py-16">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Wähle dein Spiel
+                Mit anderen in Räumen
               </h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Von klassischen Rätseln bis zu kreativen Herausforderungen - 
-                hier findest du das perfekte Spiel für jeden Anlass.
+                Spiele, die du mit mehreren Personen in einem gemeinsamen Raum spielst – live synchronisiert.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {games.map((game) => (
+              {games.filter(g => g.mode === 'rooms').map((game) => (
+                <GameCard key={game.id} game={game} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Games Section - Single Device */}
+        <section id="games-single" className="py-8">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Ein Gerät (1 Telefon)
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Spiele, die mit einem einzigen Telefon funktionieren – ideal für unterwegs oder zu zweit.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {games.filter(g => g.mode === 'single').map((game) => (
                 <GameCard key={game.id} game={game} />
               ))}
             </div>

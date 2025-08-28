@@ -18,6 +18,7 @@ export interface Game {
   tags: string[]
   icon: LucideIcon
   comingSoon?: boolean
+  mode: 'rooms' | 'single'
 }
 
 export const games: Game[] = [
@@ -30,6 +31,7 @@ export const games: Game[] = [
     maxPlayers: 8,
     tags: ["Wissen", "Echtzeit", "Kompetitiv"],
     icon: Brain,
+    mode: 'rooms',
   },
   {
     id: "stadt-land-fluss",
@@ -40,6 +42,7 @@ export const games: Game[] = [
     maxPlayers: 6,
     tags: ["Kreativität", "Klassiker", "Schnell"],
     icon: MapPin,
+    mode: 'rooms',
   },
   {
     id: "wer-bin-ich",
@@ -50,6 +53,7 @@ export const games: Game[] = [
     maxPlayers: 8,
     tags: ["Raten", "Party", "Lustig"],
     icon: Users,
+    mode: 'rooms',
   },
   {
     id: "blitzrunde",
@@ -61,6 +65,7 @@ export const games: Game[] = [
     tags: ["Schnell", "Reaktion", "Echtzeit"],
     icon: Zap,
     comingSoon: true,
+    mode: 'single',
   },
   {
     id: "storytelling",
@@ -72,6 +77,7 @@ export const games: Game[] = [
     tags: ["Kreativität", "Kooperativ", "Lustig"],
     icon: MessageSquare,
     comingSoon: true,
+    mode: 'rooms',
   },
   {
     id: "zielscheibe",
@@ -83,6 +89,7 @@ export const games: Game[] = [
     tags: ["Schätzen", "Strategie", "Präzision"],
     icon: Target,
     comingSoon: true,
+    mode: 'single',
   },
 ]
 
