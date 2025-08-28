@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // No static export for Vercel - it supports dynamic routes
+  // No static export for Vercel - it supports dynamic routes and API routes
   trailingSlash: true,
   images: {
     unoptimized: true,
