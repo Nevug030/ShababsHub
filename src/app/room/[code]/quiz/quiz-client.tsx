@@ -865,7 +865,16 @@ function QuizPageContent({ code }: QuizClientProps) {
           {/* Scoreboard */}
           <div className="space-y-6">
             <Scoreboard 
-              scores={quizState.scores}
+              scores={Array.from(quizState.scores.entries()).map(([playerId, scoreData]) => {
+                const player = players.find(p => p.player_id === playerId)
+                return {
+                  player_id: playerId,
+                  display_name: player?.display_name || 'Unknown',
+                  score: scoreData.score,
+                  correctAnswers: scoreData.correct_answers,
+                  totalAnswers: scoreData.total_answers,
+                }
+              })}
               currentPlayerId={currentPlayer?.id}
               maxVisible={5}
               showStats={true}
