@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase/browser"
 import { getOrCreatePlayer } from "@/lib/storage"
 import { isValidRoomCode } from "@/lib/id"
 import { Scoreboard } from "@/components/quiz/scoreboard"
+import { getRandomQuestions } from "@/lib/quiz/questions"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 import type { Room, RoomPlayer, PresenceState } from "@/types/rooms"
 import type { 
@@ -287,24 +288,23 @@ function QuizPageContent({ code }: QuizClientProps) {
 
   // Host actions
   const startQuiz = useCallback(async () => {
-    if (!isHost) return
+    if (!isHost || !channel) return
 
     try {
-      const response = await fetch('/api/quiz/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_code: code,
-          total_rounds: DEFAULT_QUIZ_CONFIG.totalRounds,
-        }),
-      })
-
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to start quiz')
+      const startEvent: QuizStartEvent = {
+        type: 'quiz',
+        action: 'start',
+        total_rounds: DEFAULT_QUIZ_CONFIG.totalRounds,
       }
 
-      // Quiz started event will be broadcasted
+      await channel.send({
+        type: 'broadcast',
+        event: 'quiz',
+        payload: startEvent,
+      })
+
+      // Immediately start first round
+      await nextRound()
     } catch (err) {
       console.error('Failed to start quiz:', err)
       addToast({
@@ -313,26 +313,32 @@ function QuizPageContent({ code }: QuizClientProps) {
         variant: "destructive",
       })
     }
-  }, [isHost, code, addToast])
+  }, [isHost, channel, addToast, nextRound])
 
   const nextRound = useCallback(async () => {
-    if (!isHost) return
+    if (!isHost || !channel) return
 
     try {
-      const response = await fetch('/api/quiz/rounds', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          room_code: code,
-        }),
-      })
+      const [q] = getRandomQuestions(1)
+      const deadlineIso = new Date(Date.now() + DEFAULT_QUIZ_CONFIG.roundDuration * 1000).toISOString()
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to start round')
+      const roundEvent: QuizRoundStartEvent = {
+        type: 'quiz',
+        action: 'round_start',
+        round_number: (quizState.currentRound ?? 0) + 1,
+        question: {
+          question: q.question,
+          choices: q.choices,
+          correct_index: q.correct,
+        },
+        deadline: deadlineIso,
       }
 
-      // Round started event will be broadcasted
+      await channel.send({
+        type: 'broadcast',
+        event: 'quiz',
+        payload: roundEvent,
+      })
     } catch (err) {
       console.error('Failed to start round:', err)
       addToast({
@@ -341,7 +347,7 @@ function QuizPageContent({ code }: QuizClientProps) {
         variant: "destructive",
       })
     }
-  }, [isHost, code, addToast])
+  }, [isHost, channel, quizState.currentRound, addToast])
 
   const lockAnswers = useCallback(async () => {
     if (!isHost || !channel) return
