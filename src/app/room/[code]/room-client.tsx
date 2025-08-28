@@ -41,7 +41,7 @@ function RoomPageContent({ code }: RoomClientProps) {
               <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Der Raumcode "{code}" ist ungültig.</p>
+              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
               <Button onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Zurück zur Startseite
@@ -175,7 +175,7 @@ function RoomPageContent({ code }: RoomClientProps) {
       await navigator.clipboard.writeText(code)
       addToast({
         title: "Kopiert!",
-        description: `Raumcode "${code}" wurde in die Zwischenablage kopiert.`,
+        description: `Raumcode &quot;${code}&quot; wurde in die Zwischenablage kopiert.`,
       })
     } catch (err) {
       console.error('Failed to copy room code:', err)
@@ -299,7 +299,7 @@ function RoomPageContent({ code }: RoomClientProps) {
               <CardTitle>Raum nicht gefunden</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Der Raum mit dem Code "{code}" existiert nicht oder ist nicht mehr verfügbar.</p>
+              <p className="mb-4">Der Raum mit dem Code &quot;{code}&quot; existiert nicht oder ist nicht mehr verfügbar.</p>
               <Button onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Zurück zur Startseite

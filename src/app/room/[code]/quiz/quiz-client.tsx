@@ -66,7 +66,7 @@ function QuizPageContent({ code }: QuizClientProps) {
               <CardTitle className="text-red-600">Ungültiger Raumcode</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Der Raumcode "{code}" ist ungültig.</p>
+              <p className="mb-4">Der Raumcode &quot;{code}&quot; ist ungültig.</p>
               <Button onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Zurück zur Startseite
@@ -559,7 +559,7 @@ function QuizPageContent({ code }: QuizClientProps) {
               <CardTitle>Raum nicht gefunden</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Der Raum mit dem Code "{code}" existiert nicht.</p>
+              <p className="mb-4">Der Raum mit dem Code &quot;{code}&quot; existiert nicht.</p>
               <Button onClick={() => router.push('/')}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Zurück zur Startseite
