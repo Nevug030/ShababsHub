@@ -125,7 +125,6 @@ function RoomPageContent({ code }: RoomClientProps) {
       const waveEvent: WaveBroadcast = {
         type: 'wave',
         from: currentPlayer.name,
-        timestamp: new Date().toISOString(),
       }
 
       await channel.send({
