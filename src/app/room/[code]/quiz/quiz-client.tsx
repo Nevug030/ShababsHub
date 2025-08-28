@@ -303,8 +303,27 @@ function QuizPageContent({ code }: QuizClientProps) {
         payload: startEvent,
       })
 
-      // Immediately start first round
-      await nextRound()
+      // Immediately start first round without referencing nextRound
+      const [q] = getRandomQuestions(1)
+      const deadlineIso = new Date(Date.now() + DEFAULT_QUIZ_CONFIG.roundDuration * 1000).toISOString()
+
+      const roundEvent: QuizRoundStartEvent = {
+        type: 'quiz',
+        action: 'round_start',
+        round_number: (quizState.currentRound ?? 0) + 1,
+        question: {
+          question: q.question,
+          choices: q.choices,
+          correct_index: q.correct,
+        },
+        deadline: deadlineIso,
+      }
+
+      await channel.send({
+        type: 'broadcast',
+        event: 'quiz',
+        payload: roundEvent,
+      })
     } catch (err) {
       console.error('Failed to start quiz:', err)
       addToast({
@@ -313,7 +332,7 @@ function QuizPageContent({ code }: QuizClientProps) {
         variant: "destructive",
       })
     }
-  }, [isHost, channel, addToast, nextRound])
+  }, [isHost, channel, addToast, quizState.currentRound])
 
   const nextRound = useCallback(async () => {
     if (!isHost || !channel) return
