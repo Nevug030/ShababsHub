@@ -14,10 +14,31 @@ import { Scoreboard } from "@/components/quiz/scoreboard"
 import type { RealtimeChannel } from "@supabase/supabase-js"
 import type { Room, RoomPlayer, PresenceState } from "@/types/rooms"
 import type { 
-  QuizState, 
-  PlayerScore,
-  DEFAULT_QUIZ_CONFIG
+  PlayerScore
 } from "@/types/quiz"
+
+// Local quiz configuration
+const DEFAULT_QUIZ_CONFIG = {
+  totalRounds: 5,
+  pointsPerQuestion: 10,
+  roundDuration: 20, // seconds
+}
+
+// Local QuizState interface that matches our implementation
+interface QuizState {
+  phase: 'waiting' | 'answering' | 'revealing' | 'ended'
+  currentRound: number
+  totalRounds: number
+  currentQuestion: {
+    question: string
+    choices: string[]
+    correct_index: number
+  } | null
+  playerAnswers: Map<string, { choice_index: number; timestamp: string }>
+  scores: Map<string, { score: number; correct_answers: number; total_answers: number }>
+  timeLeft: number
+  deadline: string | null
+}
 
 // Temporary types for the current implementation
 interface QuizStartEvent {
